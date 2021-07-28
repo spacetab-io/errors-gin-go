@@ -1,12 +1,12 @@
 module github.com/microparts/errors-go-gin
 
-go 1.12
+go 1.16
 
 require (
-	github.com/gin-gonic/gin v1.6.3
-	github.com/microparts/errors-go v1.1.1
-	github.com/stretchr/testify v1.4.0
-	google.golang.org/genproto v0.0.0-20190819201941-24fa4b261c55
-	google.golang.org/grpc v1.29.1
-	gopkg.in/go-playground/validator.v9 v9.30.0
+	github.com/gin-gonic/gin v1.7.2
+	github.com/go-playground/validator/v10 v10.8.0
+	github.com/spacetab-io/errors-go v1.3.0
+	github.com/stretchr/testify v1.7.0
+	google.golang.org/genproto v0.0.0-20210726200206-e7812ac95cc0
+	google.golang.org/grpc v1.39.0
 )

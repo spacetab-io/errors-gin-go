@@ -6,16 +6,17 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+	errs "github.com/spacetab-io/errors-go"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
-	"gopkg.in/go-playground/validator.v9"
-
-	errs "github.com/microparts/errors-go"
 )
 
-type langName string
-type validationRule string
-type errorPattern string
-type validationErrors map[validationRule]errorPattern
+type (
+	langName         string
+	validationRule   string
+	errorPattern     string
+	validationErrors map[validationRule]errorPattern
+)
 
 func (ve errorPattern) string() string {
 	return string(ve)
@@ -46,6 +47,7 @@ var (
 	ErrNoMethod       = errors.New("method not allowed")
 	ErrServerError    = errors.New("internal server error")
 	ErrRecordNotFound = errors.New("record not found")
+	ErrUnknownErrVal  = errors.New("unknown error value")
 )
 
 func getLang(c *gin.Context) langName {
@@ -57,32 +59,44 @@ func getLang(c *gin.Context) langName {
 	return langName(lang)
 }
 
-// validationErrors Формирование массива ошибок
+// validationErrors Формирование массива ошибок.
 func makeErrorsSlice(err error, lang langName) map[errs.FieldName][]errs.ValidationError {
 	ve := make(map[errs.FieldName][]errs.ValidationError)
-	for _, e := range err.(validator.ValidationErrors) {
+
+	//nolint: errorlint
+	verrs, ok := err.(validator.ValidationErrors)
+	if !ok {
+		return nil
+	}
+
+	for _, e := range verrs {
 		field := getFieldName(e.Namespace(), e.Field())
 		if _, ok := ve[field]; !ok {
 			ve[field] = make([]errs.ValidationError, 0)
 		}
+
 		ve[field] = append(
 			ve[field],
 			getErrMessage(validationRule(e.ActualTag()), field, e.Param(), lang),
 		)
 	}
+
 	return ve
 }
 
 func makeErrorsSliceFromViolations(violations []*errdetails.BadRequest_FieldViolation) map[errs.FieldName][]errs.ValidationError {
 	ve := make(map[errs.FieldName][]errs.ValidationError)
+
 	for _, v := range violations {
 		if v == nil {
 			continue
 		}
+
 		field := errs.FieldName(v.Field)
 		if _, ok := ve[field]; !ok {
 			ve[field] = make([]errs.ValidationError, 0)
 		}
+
 		e := errs.ValidationError(v.Description)
 		ve[field] = append(ve[field], e)
 	}
@@ -91,12 +105,12 @@ func makeErrorsSliceFromViolations(violations []*errdetails.BadRequest_FieldViol
 }
 
 func getFieldName(namespace string, field string) errs.FieldName {
-	namespace = strings.Replace(namespace, "]", "", -1)
-	namespace = strings.Replace(namespace, "[", ".", -1)
+	namespace = strings.ReplaceAll(namespace, "]", "")
+	namespace = strings.ReplaceAll(namespace, "[", ".")
 	namespaceSlice := strings.Split(namespace, ".")
 	fieldName := field
 
-	if len(namespaceSlice) > 2 {
+	if len(namespaceSlice) > 2 { //nolint: gomnd
 		fieldName = strings.Join([]string{strings.Join(namespaceSlice[1:len(namespaceSlice)-1], "."), field}, ".")
 	}
 
@@ -105,8 +119,8 @@ func getFieldName(namespace string, field string) errs.FieldName {
 
 func getErrMessage(errorType validationRule, field errs.FieldName, param string, lang langName) errs.ValidationError {
 	errKey := errorType
-	_, ok := CommonValidationErrors[lang][errorType]
-	if !ok {
+
+	if _, ok := CommonValidationErrors[lang][errorType]; !ok {
 		errKey = "ek"
 	}
 

@@ -10,15 +10,15 @@ package main
 import (
 	"errors"
 	"net/http"
-	
+
 	"github.com/gin-gonic/gin"
-	"github.com/microparts/errors-go-gin"
+	"github.com/spacetab-io/errors-gin-go"
 )
 
 func main() {
 	r := gin.New()
 
-	r.GET("/", func(c*gin.Context) {c.JSON(http.StatusOK,`{"status":"ok"}`)})
+	r.GET("/", func(c *gin.Context) { c.JSON(http.StatusOK, `{"status":"ok"}`) })
 	r.GET("/err", func(c *gin.Context) { ginerrors.Response(c, errors.New("error")) })
 	_ = r.Run(":8080")
 }
@@ -26,8 +26,8 @@ func main() {
 
 ## Linter
 
-Lint code with [golangci-lint](https://github.com/golangci/golangci-lint) and 
-[custom config](https://github.com/microparts/docker-golang/blob/master/lint/.golangci.yml) for it: 
+Lint code with [golangci-lint](https://github.com/golangci/golangci-lint) and
+[custom config](https://github.com/spacetab-io/linter-go/blob/master/.golangci.yml) for it:
 
     make lint
 
@@ -35,4 +35,4 @@ Lint code with [golangci-lint](https://github.com/golangci/golangci-lint) and
 
 Test code with race checking and generation coverage profile:
 
-    make test
+    make tests

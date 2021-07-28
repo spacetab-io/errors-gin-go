@@ -6,25 +6,24 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+	errs "github.com/spacetab-io/errors-go"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"gopkg.in/go-playground/validator.v9"
-
-	errs "github.com/microparts/errors-go"
 )
 
 const (
 	validationErrorMessage = "validation error"
 )
 
-//Response makes common error response
+// Response makes common error response.
 func Response(c *gin.Context, err interface{}) {
 	errCode, data := MakeResponse(err, getLang(c))
 	resp := errs.Response{Error: *data}
 	c.AbortWithStatusJSON(errCode, resp)
 }
 
-//MakeResponse makes ErrorObject based on error type
+// MakeResponse makes ErrorObject based on error type.
 func MakeResponse(err interface{}, lang langName) (int, *errs.ErrorObject) {
 	errObj := &errs.ErrorObject{}
 	errCode := http.StatusBadRequest
@@ -39,9 +38,11 @@ func MakeResponse(err interface{}, lang langName) (int, *errs.ErrorObject) {
 	case []error:
 		errCode = http.StatusInternalServerError
 		msgs := make([]string, 0)
+
 		for _, e := range err.([]error) {
 			msgs = append(msgs, e.Error())
 		}
+
 		errObj.Message = strings.Join(msgs, "; ")
 	case validator.ValidationErrors:
 		errCode = http.StatusUnprocessableEntity

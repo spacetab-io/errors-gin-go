@@ -2,21 +2,33 @@ deps:
 	go mod vendor
 .PHONY: deps
 
-get_lint_config:
-	@[ -f ./.golangci.yml ] && echo ".golangci.yml exists" || ( echo "getting .golangci.yml" && curl -O https://raw.githubusercontent.com/microparts/docker-golang/master/lint/.golangci.yml )
-.PHONY: get_lint_config
+# ----
+## LINTER stuff start
 
-lint: get_lint_config
-	golangci-lint run
+linter_include_check:
+	@[ -f linter.mk ] && echo "linter.mk include exists" || (echo "getting linter.mk from github.com" && curl -sO https://raw.githubusercontent.com/spacetab-io/makefiles/master/golang/linter.mk)
+
 .PHONY: lint
+lint: linter_include_check
+	@make -f linter.mk go_lint
 
-test-unit:
-	go test $$(go list ./...) --race --cover -count=1 -timeout 1s -coverprofile=c.out -v
-.PHONY: test-unit
+## LINTER stuff end
+# ----
 
-coverage-html:
-	go tool cover -html=c.out -o coverage.html
-.PHONE: coverage-html
+# ----
+## TESTS stuff start
 
-test: deps test-unit coverage-html
-.PHONY: test
+tests_include_check:
+	@[ -f tests.mk ] && echo "tests.mk include exists" || (echo "getting tests.mk from github.com" && curl -sO https://raw.githubusercontent.com/spacetab-io/makefiles/master/golang/tests.mk)
+
+tests: tests_include_check
+	@make -f tests.mk go_tests
+.PHONY: tests
+
+tests_html: tests_include_check
+	@make -f tests.mk go_tests_html
+	@open coverage.html
+.PHONY: tests
+
+## TESTS stuff end
+# ----
