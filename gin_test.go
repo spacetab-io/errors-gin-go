@@ -10,8 +10,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	ginerrors "github.com/spacetab-io/errors-gin-go"
 	errs "github.com/spacetab-io/errors-go"
-	ginerrors "github.com/spacetab-io/errors-go-gin"
 	"github.com/stretchr/testify/assert"
 )
 

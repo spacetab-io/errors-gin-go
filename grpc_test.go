@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"testing"
 
-	ginerrors "github.com/spacetab-io/errors-go-gin"
+	ginerrors "github.com/spacetab-io/errors-gin-go"
 	"github.com/stretchr/testify/assert"
 )
 

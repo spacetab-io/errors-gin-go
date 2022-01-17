@@ -1,4 +1,4 @@
-module github.com/spacetab-io/errors-go-gin
+module github.com/spacetab-io/errors-gin-go
 
 go 1.16
 
@@ -10,5 +10,3 @@ require (
 	google.golang.org/genproto v0.0.0-20220114231437-d2e6a121cae0
 	google.golang.org/grpc v1.43.0
 )
-
-//replace github.com/spacetab-io/errors-go => ../errors-go
