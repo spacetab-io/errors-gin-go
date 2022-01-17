@@ -1,7 +1,3 @@
-deps:
-	go mod vendor
-.PHONY: deps
-
 # ----
 ## LINTER stuff start
 
@@ -27,8 +23,7 @@ tests: tests_include_check
 
 tests_html: tests_include_check
 	@make -f tests.mk go_tests_html
-	@open coverage.html
-.PHONY: tests
+.PHONY: tests_html
 
 ## TESTS stuff end
 # ----

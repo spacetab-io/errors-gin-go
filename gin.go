@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	errs "github.com/spacetab-io/errors-go"
+	"github.com/spacetab-io/errors-go"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -19,15 +19,15 @@ const (
 // Response makes common error response.
 func Response(c *gin.Context, err interface{}) {
 	errCode, data := MakeResponse(err, getLang(c))
-	resp := errs.Response{Error: *data}
+	resp := errors.Response{Error: data}
 	c.AbortWithStatusJSON(errCode, resp)
 }
 
 // MakeResponse makes ErrorObject based on error type.
-func MakeResponse(err interface{}, lang langName) (int, *errs.ErrorObject) {
-	errObj := &errs.ErrorObject{}
+func MakeResponse(err interface{}, lang langName) (int, errors.ErrorObject) {
+	errObj := errors.ErrorObject{}
 	errCode := http.StatusBadRequest
-	errType := errs.ErrorTypeError
+	errType := errors.ErrorTypeError
 
 	switch et := err.(type) {
 	case GRPCValidationError:
@@ -56,6 +56,8 @@ func MakeResponse(err interface{}, lang langName) (int, *errs.ErrorObject) {
 		}
 
 		errCode, errObj.Message = getErrCode(et)
+	case string:
+		errObj.Message = et
 	case map[string]error:
 		msgs := make(map[string]string)
 		for k, e := range et {
